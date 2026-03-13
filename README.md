@@ -6,26 +6,26 @@ See also [on stackoverflow](https://stackoverflow.com/questions/98310/focus-foll
 
 **Quick start**
 
-1. Download the [latest release](https://github.com/sbmpost/AutoRaise/releases/latest)
-2. In Finder, double click the downloaded file to unpack.
-3. Locate the unpacked folder and double click AutoRaise.dmg
-4. Single click AutoRaise under "Locations" in Finder.
-5. Drag AutoRaise.app into the Applications folder.
-6. Open AutoRaise from Applications.
-7. Left click the balloon icon in the menu bar to give permissions to AutoRaise in System/Accessibility.
-8. Right click the balloon icon in the menu bar to set preferences.
+1. Download `AutoRaise.dmg` from the [latest release](https://github.com/aaabramov/AutoRaise/releases/latest)
+2. Open the DMG and drag AutoRaise.app into the Applications folder.
+3. Remove the quarantine attribute (required for accessibility permissions):
+   ```
+   xattr -cr /Applications/AutoRaise.app
+   ```
+4. Open AutoRaise from Applications.
+5. Left click the menu bar icon to give permissions to AutoRaise in System/Accessibility.
+6. Right click the menu bar icon to set preferences.
 
-*Important*: When you enable Accessibility in System Preferences, if you see an older AutoRaise item with balloon icon in the
-Accessibility pane, first remove it **completely** (clicking the minus). Then stop and start AutoRaise by left clicking the balloon
+*Important*: When you enable Accessibility in System Preferences, if you see an older AutoRaise item in the
+Accessibility pane, first remove it **completely** (clicking the minus). Then stop and start AutoRaise by left clicking the menu bar
 icon. The item should re-appear so that you can properly enable Accessibility.
 
 **Compiling AutoRaise**
 
-To compile AutoRaise yourself, download the master branch from [here](https://github.com/sbmpost/AutoRaise/archive/refs/heads/master.zip)
-and use the following commands:
+To compile AutoRaise yourself, clone the repository and use the following commands:
 
-    unzip -d ~ ~/Downloads/AutoRaise-master.zip
-    cd ~/AutoRaise-master && make clean && make && make install
+    git clone https://github.com/aaabramov/AutoRaise.git
+    cd AutoRaise && make clean && make && make install
 
 **Advanced compilation options**
 
@@ -102,7 +102,7 @@ Changes made via the menu bar or preferences window are saved automatically to `
   - mouseDelta: Requires the mouse to move a certain distance. 0.0 = most sensitive whereas higher values decrease sensitivity.
 
   - verbose: Set to true to make AutoRaise show a log of events when started in a terminal.
-    
+
 AutoRaise can read these parameters from a configuration file. To make this happen, create a **~/.AutoRaise** file or a
 **~/.config/AutoRaise/config** file. The format is as follows:
 
@@ -161,10 +161,18 @@ If you experience any issues, it is suggested to first check these points:
 - Are you running two AutoRaise instances at the same time? Use "Activity Monitor" to check this.
 - Is Accessibility properly enabled? To be absolutely sure, remove any previous AutoRaise items
 that may be present in the System Preferences|Security & Privacy|Privacy|Accessibility pane. Then
-start AutoRaise and enable accessibility again.
+start AutoRaise and enable accessibility again. You can also reset Accessibility permissions from
+the command line:
 
-If after checking the above you still experience the problem, I encourage you to create an issue
-in github. It will be helpful to provide (a small part of) the verbose log, which can be enabled
+      tccutil reset Accessibility nl.postware.autoraise
+
+- After downloading or updating AutoRaise.app, macOS may flag it with a quarantine attribute that
+prevents it from working properly. Remove it with:
+
+      xattr -cr /Applications/AutoRaise.app
+
+If after checking the above you still experience the problem, I encourage you to create an
+[issue](https://github.com/aaabramov/AutoRaise/issues). It will be helpful to provide (a small part of) the verbose log, which can be enabled
 like so:
 
     ./AutoRaise <parameters you would like to add> -verbose true
