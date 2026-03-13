@@ -1,14 +1,14 @@
 #!/bin/bash
 
-APP_NAME="${1:-AutoRaise}"
-BUNDLE_ID="${2:-com.iamandrii.autoraise}"
+APP_NAME="${1:-Hoist}"
+BUNDLE_ID="${2:-com.iamandrii.hoist}"
 
 rm -rf "${APP_NAME}.app" && \
 mkdir -p "${APP_NAME}.app/Contents/MacOS" && \
 mkdir "${APP_NAME}.app/Contents/Resources" && \
-cp AutoRaise "${APP_NAME}.app/Contents/MacOS/${APP_NAME}" && \
-sed -e "s/com\.iamandrii\.autoraise/${BUNDLE_ID}/" \
-    -e "s/<string>AutoRaise<\/string>/<string>${APP_NAME}<\/string>/g" \
+cp Hoist "${APP_NAME}.app/Contents/MacOS/${APP_NAME}" && \
+sed -e "s/com\.iamandrii\.hoist/${BUNDLE_ID}/" \
+    -e "s/<string>Hoist<\/string>/<string>${APP_NAME}<\/string>/g" \
     Info.plist > "${APP_NAME}.app/Contents/Info.plist" && \
-cp AutoRaise.icns "${APP_NAME}.app/Contents/Resources" && \
+cp Hoist.icns "${APP_NAME}.app/Contents/Resources" && \
 chmod 755 "${APP_NAME}.app" && echo "Successfully created ${APP_NAME}.app"
