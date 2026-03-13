@@ -4,16 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AutoRaise is a macOS utility that automatically raises and focuses windows on mouse hover. It's an Objective-C++ project split across multiple files with a Makefile build system. The .app bundle includes a menu bar status icon for runtime configuration and a preferences window.
+Hoist is a macOS utility that automatically raises and focuses windows on mouse hover. It's an Objective-C++ project split across multiple files with a Makefile build system. The .app bundle includes a menu bar status icon for runtime configuration and a preferences window.
 
 ## Build Commands
 
 ```bash
 make            # Build both CLI binary and .app bundle (default target: all)
 make clean      # Remove binaries, object files, and .app directories
-make install    # Install AutoRaise.app to /Applications
+make install    # Install Hoist.app to /Applications
 make build      # Clean build with experimental flags (EXPERIMENTAL_FOCUS_FIRST, OLD_ACTIVATION_METHOD)
-make dev        # Clean build of AutoRaiseDev.app with experimental flags (separate bundle ID for parallel dev testing)
+make dev        # Clean build of HoistDev.app with experimental flags (separate bundle ID for parallel dev testing)
 make run        # Dev build and execute
 make debug      # Dev build with verbose logging and execute
 make update     # Build and install to /Applications
@@ -23,15 +23,15 @@ Compiler: `g++` with `-fobjc-arc -O2`. Requires Xcode Command Line Tools.
 
 ## Architecture
 
-The codebase is split into these files, all sharing `AutoRaise.h`:
+The codebase is split into these files, all sharing `Hoist.h`:
 
-- **`AutoRaise.h`** — Shared header: includes, constants, `extern` globals, `@interface` blocks, function prototypes
-- **`AutoRaiseGlobals.mm`** — Global variable definitions, config key constants, `parametersDictionary`/`parameters`
-- **`AutoRaiseHelpers.mm`** — Window detection (`get_mousewindow`, `get_raisable_window`, `topwindow`, `fallback`), activation (`activate`, `raiseAndActivate`), mouse warping (`get_mousepoint`), environment checks (`dock_active`, `mc_active`, `findScreen`), yabai focus methods
-- **`AutoRaiseWatcher.mm`** — `MDWorkspaceWatcher`: space changes, app activation, cursor scaling, polling timer
-- **`AutoRaiseConfig.mm`** — `ConfigClass`: CLI args and config file parsing (`~/.AutoRaise` or `~/.config/AutoRaise/config`)
-- **`AutoRaiseUI.mm`** — `PreferencesWindowController` + `StatusBarController`: menu bar icon, context menu, preferences panel, live config persistence
-- **`AutoRaiseMain.mm`** — `spaceChanged()`, `appActivated()`, `onTick()` polling loop, `eventTapHandler()`, `main()`
+- **`Hoist.h`** — Shared header: includes, constants, `extern` globals, `@interface` blocks, function prototypes
+- **`HoistGlobals.mm`** — Global variable definitions, config key constants, `parametersDictionary`/`parameters`
+- **`HoistHelpers.mm`** — Window detection (`get_mousewindow`, `get_raisable_window`, `topwindow`, `fallback`), activation (`activate`, `raiseAndActivate`), mouse warping (`get_mousepoint`), environment checks (`dock_active`, `mc_active`, `findScreen`), yabai focus methods
+- **`HoistWatcher.mm`** — `MDWorkspaceWatcher`: space changes, app activation, cursor scaling, polling timer
+- **`HoistConfig.mm`** — `ConfigClass`: CLI args and config file parsing (`~/.Hoist` or `~/.config/Hoist/config`)
+- **`HoistUI.mm`** — `PreferencesWindowController` + `StatusBarController`: menu bar icon, context menu, preferences panel, live config persistence
+- **`HoistMain.mm`** — `spaceChanged()`, `appActivated()`, `onTick()` polling loop, `eventTapHandler()`, `main()`
 
 ## Key Compilation Flags
 
@@ -50,5 +50,5 @@ AppKit, ApplicationServices, CoreFoundation, Carbon (legacy), SkyLight (optional
 - **Fallback chain**: Multiple window detection methods (`get_mousewindow` → `fallback`) for reliability across apps
 - **Hard-coded app quirk lists**: Special handling for apps like Finder desktop, IntelliJ (raises on focus), PWAs (Chrome/Brave), and apps without window titles (System Settings, Calculator)
 - **Menu bar status icon**: Left-click toggles raise on/off, right-click shows context menu. App runs as accessory (`NSApplicationActivationPolicyAccessory`)
-- **Live config persistence**: Changes made via menu/preferences are saved immediately to `~/.config/AutoRaise/config`
+- **Live config persistence**: Changes made via menu/preferences are saved immediately to `~/.config/Hoist/config`
 - **Config layering**: Config file is always read first as base; CLI arguments override file values

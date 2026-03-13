@@ -14,7 +14,7 @@ FIX=false
 
 read -r -d '' HEADER << 'EOF' || true
 /*
- * AutoRaise - Copyright (C) 2026 aaabramov
+ * Hoist - Copyright (C) 2026 aaabramov
  * Some pieces of the code are based on
  * sbmpost by sbmpost as part of https://github.com/sbmpost/AutoRaise
  * metamove by jmgao as part of XFree86
@@ -34,7 +34,7 @@ read -r -d '' HEADER << 'EOF' || true
  */
 EOF
 
-NEEDLE="AutoRaise - Copyright (C) 2026 aaabramov"
+NEEDLE="Hoist - Copyright (C) 2026 aaabramov"
 failed=0
 
 for file in "$REPO_ROOT"/*.h "$REPO_ROOT"/*.mm; do
