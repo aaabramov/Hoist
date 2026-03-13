@@ -1,7 +1,7 @@
 /*
  * Hoist - Copyright (C) 2026 aaabramov
  * Some pieces of the code are based on
- * sbmpost by sbmpost as part of https://github.com/sbmpost/AutoRaise
+ * https://github.com/sbmpost/AutoRaise by sbmpost
  * metamove by jmgao as part of XFree86
  *
  * This program is free software: you can redistribute it and/or modify
@@ -450,7 +450,7 @@ int main(int argc, const char * argv[]) {
         invertIgnoreApps   = [parameters[kInvertIgnoreApps] boolValue];
         invertDisableKey   = [parameters[kInvertDisableKey] boolValue];
 
-        printf("\nv%s by sbmpost(c) 2026, usage:\n\nHoist\n", HOIST_VERSION);
+        printf("\nv%s by aaabramov(c) 2026, usage:\n\nHoist\n", HOIST_VERSION);
         printf("  -pollMillis <20, 30, 40, 50, ...>\n");
         printf("  -delay <0=no-raise, 1=no-delay, 2=%dms, 3=%dms, ...>\n", pollMillis, pollMillis*2);
 #ifdef FOCUS_FIRST

@@ -1,7 +1,7 @@
 /*
  * Hoist - Copyright (C) 2026 aaabramov
  * Some pieces of the code are based on
- * sbmpost by sbmpost as part of https://github.com/sbmpost/AutoRaise
+ * https://github.com/sbmpost/AutoRaise by sbmpost
  * metamove by jmgao as part of XFree86
  *
  * This program is free software: you can redistribute it and/or modify

@@ -16,7 +16,7 @@ read -r -d '' HEADER << 'EOF' || true
 /*
  * Hoist - Copyright (C) 2026 aaabramov
  * Some pieces of the code are based on
- * sbmpost by sbmpost as part of https://github.com/sbmpost/AutoRaise
+ * AutoRaise by sbmpost as part of https://github.com/sbmpost/AutoRaise
  * metamove by jmgao as part of XFree86
  *
  * This program is free software: you can redistribute it and/or modify
