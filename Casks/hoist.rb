@@ -1,20 +1,20 @@
-cask "autoraise" do
+cask "hoist" do
   version :latest
   sha256 :no_check
 
-  url "https://github.com/aaabramov/AutoRaise/releases/latest/download/AutoRaise.dmg"
-  name "AutoRaise"
+  url "https://github.com/aaabramov/Hoist/releases/latest/download/Hoist.dmg"
+  name "Hoist"
   desc "Automatically raises and focuses windows on mouse hover"
-  homepage "https://github.com/aaabramov/AutoRaise"
+  homepage "https://github.com/aaabramov/Hoist"
 
-  app "AutoRaise.app"
+  app "Hoist.app"
 
   postflight do
     system_command "/usr/bin/xattr",
-                   args: ["-cr", "#{appdir}/AutoRaise.app"]
+                   args: ["-cr", "#{appdir}/Hoist.app"]
   end
 
-  uninstall quit: "com.iamandrii.autoraise"
+  uninstall quit: "com.iamandrii.hoist"
 
-  zap trash: "~/.config/AutoRaise"
+  zap trash: "~/.config/Hoist"
 end

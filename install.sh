@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-REPO="aaabramov/AutoRaise"
-APP_NAME="AutoRaise.app"
+REPO="aaabramov/Hoist"
+APP_NAME="Hoist.app"
 INSTALL_DIR="/Applications"
 
 echo "Fetching latest release..."
@@ -17,7 +17,7 @@ if [ -z "$DOWNLOAD_URL" ]; then
 fi
 
 TMPDIR=$(mktemp -d)
-DMG_PATH="${TMPDIR}/AutoRaise.dmg"
+DMG_PATH="${TMPDIR}/Hoist.dmg"
 MOUNT_POINT="${TMPDIR}/mount"
 
 cleanup() {
@@ -48,11 +48,11 @@ echo "Removing quarantine attribute..."
 xattr -cr "${INSTALL_DIR}/${APP_NAME}"
 
 echo ""
-echo "AutoRaise has been installed to ${INSTALL_DIR}/${APP_NAME}"
+echo "Hoist has been installed to ${INSTALL_DIR}/${APP_NAME}"
 echo ""
 
-read -rp "Launch AutoRaise now? [Y/n] " answer
+read -rp "Launch Hoist now? [Y/n] " answer
 if [[ -z "$answer" || "$answer" =~ ^[Yy] ]]; then
     open "${INSTALL_DIR}/${APP_NAME}"
-    echo "AutoRaise launched. Grant Accessibility permission when prompted."
+    echo "Hoist launched. Grant Accessibility permission when prompted."
 fi
