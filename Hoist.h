@@ -184,6 +184,7 @@ extern MDWorkspaceWatcher * workspaceWatcher;
 - (void) readConfig:(int) argc;
 - (void) readHiddenConfig;
 - (void) validateParameters;
++ (void) saveConfig;
 @end
 
 @interface PreferencesWindowController : NSObject <NSTextFieldDelegate>

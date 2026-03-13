@@ -531,47 +531,7 @@ StatusBarController *statusBarController = nil;
 }
 
 - (void) saveConfig {
-    NSString *configDir = [NSString stringWithFormat:@"%@/.config/Hoist", NSHomeDirectory()];
-    NSString *configPath = [NSString stringWithFormat:@"%@/config", configDir];
-
-    NSFileManager *fm = [NSFileManager defaultManager];
-    if (![fm fileExistsAtPath:configDir]) {
-        [fm createDirectoryAtPath:configDir withIntermediateDirectories:YES attributes:nil error:nil];
-    }
-
-    NSMutableString *content = [[NSMutableString alloc] init];
-    [content appendFormat:@"# Hoist configuration (saved by menu bar)\n"];
-    [content appendFormat:@"delay=%d\n", menuDelayCount ? menuDelayCount : savedDelayCount];
-
-    [content appendFormat:@"warpX=%.2f\n", warpX];
-    [content appendFormat:@"warpY=%.2f\n", warpY];
-    [content appendFormat:@"scale=%.1f\n", cursorScale];
-    [content appendFormat:@"scaleDuration=%d\n", scaleDurationMs];
-    [content appendFormat:@"pollMillis=%d\n", pollMillis];
-    [content appendFormat:@"requireMouseStop=%s\n", requireMouseStop ? "true" : "false"];
-    [content appendFormat:@"ignoreSpaceChanged=%s\n", ignoreSpaceChanged ? "true" : "false"];
-    [content appendFormat:@"altTaskSwitcher=%s\n", altTaskSwitcher ? "true" : "false"];
-
-    if (disableKey == (int)kCGEventFlagMaskControl) {
-        [content appendFormat:@"disableKey=control\n"];
-    } else if (disableKey == (int)kCGEventFlagMaskAlternate) {
-        [content appendFormat:@"disableKey=option\n"];
-    } else {
-        [content appendFormat:@"disableKey=disabled\n"];
-    }
-
-    NSString *ignoreAppsStr = [[PreferencesWindowController shared] ignoreAppsString];
-    if (ignoreAppsStr.length) {
-        [content appendFormat:@"ignoreApps=%@\n", ignoreAppsStr];
-    }
-    NSString *ignoreTitlesStr = [ignoreTitles componentsJoinedByString:@","];
-    if (ignoreTitlesStr.length) {
-        [content appendFormat:@"ignoreTitles=%@\n", ignoreTitlesStr];
-    }
-    if (mouseDelta > 0) { [content appendFormat:@"mouseDelta=%.1f\n", mouseDelta]; }
-    if (verbose) { [content appendFormat:@"verbose=true\n"]; }
-
-    [content writeToFile:configPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    [ConfigClass saveConfig];
 }
 
 @end // StatusBarController

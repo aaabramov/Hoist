@@ -818,6 +818,7 @@ NSMutableDictionary *parameters = [[NSMutableDictionary alloc] init];
 - (void) readConfig:(int) argc;
 - (void) readHiddenConfig;
 - (void) validateParameters;
++ (void) saveConfig;
 @end
 
 @implementation ConfigClass
@@ -852,31 +853,35 @@ NSMutableDictionary *parameters = [[NSMutableDictionary alloc] init];
 }
 
 - (void) readHiddenConfig {
-    // search for dotfiles
-    NSString * hiddenConfigFilePath = [self getFilePath: @".Hoist"];
-    if (!hiddenConfigFilePath) { hiddenConfigFilePath = [self getFilePath: @".config/Hoist/config"]; }
+    NSString * configFilePath = [self getFilePath: @".config/hoist/config.json"];
 
-    if (hiddenConfigFilePath) {
-        NSLog(@"Reading config from: %@", hiddenConfigFilePath);
+    if (configFilePath) {
+        NSLog(@"Reading config from: %@", configFilePath);
         NSError * error;
-        NSString * configContent = [[NSString alloc]
-            initWithContentsOfFile: hiddenConfigFilePath
-            encoding: NSUTF8StringEncoding error: &error];
+        NSData * data = [NSData dataWithContentsOfFile: configFilePath];
+        if (!data) { return; }
 
-        NSArray * configLines = [configContent componentsSeparatedByString: @"\n"];
-        NSString * trimmedLine, * trimmedKey, * trimmedValue, * noQuotesValue;
-        NSArray * components;
-        for (NSString * line in configLines) {
-            trimmedLine = [line stringByTrimmingCharactersInSet: [NSCharacterSet whitespaceCharacterSet]];
-            if (not [trimmedLine hasPrefix: @"#"]) {
-                components = [trimmedLine componentsSeparatedByString: @"="];
-                if ([components count] == 2) {
-                    for (id key in parametersDictionary) {
-                       trimmedKey = [components[0] stringByTrimmingCharactersInSet: [NSCharacterSet whitespaceCharacterSet]];
-                       trimmedValue = [components[1] stringByTrimmingCharactersInSet: [NSCharacterSet whitespaceCharacterSet]];
-                       noQuotesValue = [trimmedValue stringByReplacingOccurrencesOfString: @"\"" withString: @""];
-                       if ([trimmedKey isEqual: key]) { parameters[key] = noQuotesValue; }
+        NSDictionary * json = [NSJSONSerialization JSONObjectWithData: data options: 0 error: &error];
+        if (!json || error) {
+            NSLog(@"Error parsing config JSON: %@", error.localizedDescription);
+            return;
+        }
+
+        for (id key in parametersDictionary) {
+            id value = json[key];
+            if (value != nil) {
+                if ([value isKindOfClass: [NSArray class]]) {
+                    parameters[key] = [value componentsJoinedByString: @","];
+                } else if ([value isKindOfClass: [NSNumber class]]) {
+                    // NSNumber can be bool, int, or float
+                    if (strcmp([value objCType], @encode(BOOL)) == 0 ||
+                        strcmp([value objCType], @encode(char)) == 0) {
+                        parameters[key] = [value boolValue] ? @"true" : @"false";
+                    } else {
+                        parameters[key] = [value stringValue];
                     }
+                } else {
+                    parameters[key] = [NSString stringWithFormat: @"%@", value];
                 }
             }
         }
@@ -910,6 +915,51 @@ NSMutableDictionary *parameters = [[NSMutableDictionary alloc] init];
 #endif
     return;
 }
+
++ (void) saveConfig {
+    NSString *configDir = [NSString stringWithFormat:@"%@/.config/hoist", NSHomeDirectory()];
+    NSString *configPath = [NSString stringWithFormat:@"%@/config.json", configDir];
+
+    NSFileManager *fm = [NSFileManager defaultManager];
+    if (![fm fileExistsAtPath:configDir]) {
+        [fm createDirectoryAtPath:configDir withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+
+    NSMutableDictionary *config = [[NSMutableDictionary alloc] init];
+    config[@"delay"] = @(menuDelayCount ? menuDelayCount : savedDelayCount);
+    config[@"warpX"] = @(warpX);
+    config[@"warpY"] = @(warpY);
+    config[@"scale"] = @(cursorScale);
+    config[@"scaleDuration"] = @(scaleDurationMs);
+    config[@"pollMillis"] = @(pollMillis);
+    config[@"requireMouseStop"] = @(requireMouseStop);
+    config[@"ignoreSpaceChanged"] = @(ignoreSpaceChanged);
+    config[@"altTaskSwitcher"] = @(altTaskSwitcher);
+
+    if (disableKey == (int)kCGEventFlagMaskControl) {
+        config[@"disableKey"] = @"control";
+    } else if (disableKey == (int)kCGEventFlagMaskAlternate) {
+        config[@"disableKey"] = @"option";
+    } else {
+        config[@"disableKey"] = @"disabled";
+    }
+
+    NSString *ignoreAppsStr = [[PreferencesWindowController shared] ignoreAppsString];
+    if (ignoreAppsStr.length) {
+        config[@"ignoreApps"] = [ignoreAppsStr componentsSeparatedByString:@","];
+    }
+    NSString *ignoreTitlesStr = [ignoreTitles componentsJoinedByString:@","];
+    if (ignoreTitlesStr.length) {
+        config[@"ignoreTitles"] = [ignoreTitlesStr componentsSeparatedByString:@","];
+    }
+    if (mouseDelta > 0) { config[@"mouseDelta"] = @(mouseDelta); }
+    if (verbose) { config[@"verbose"] = @YES; }
+
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:config
+        options:NSJSONWritingPrettyPrinted | NSJSONWritingSortedKeys error:nil];
+    [jsonData writeToFile:configPath atomically:YES];
+}
+
 @end // ConfigClass
 
 //------------------------------------------status bar controller--------------------------------------------
@@ -1448,47 +1498,7 @@ static StatusBarController *statusBarController = nil;
 }
 
 - (void) saveConfig {
-    NSString *configDir = [NSString stringWithFormat:@"%@/.config/Hoist", NSHomeDirectory()];
-    NSString *configPath = [NSString stringWithFormat:@"%@/config", configDir];
-
-    NSFileManager *fm = [NSFileManager defaultManager];
-    if (![fm fileExistsAtPath:configDir]) {
-        [fm createDirectoryAtPath:configDir withIntermediateDirectories:YES attributes:nil error:nil];
-    }
-
-    NSMutableString *content = [[NSMutableString alloc] init];
-    [content appendFormat:@"# Hoist configuration (saved by menu bar)\n"];
-    [content appendFormat:@"delay=%d\n", menuDelayCount ? menuDelayCount : savedDelayCount];
-
-    [content appendFormat:@"warpX=%.2f\n", warpX];
-    [content appendFormat:@"warpY=%.2f\n", warpY];
-    [content appendFormat:@"scale=%.1f\n", cursorScale];
-    [content appendFormat:@"scaleDuration=%d\n", scaleDurationMs];
-    [content appendFormat:@"pollMillis=%d\n", pollMillis];
-    [content appendFormat:@"requireMouseStop=%s\n", requireMouseStop ? "true" : "false"];
-    [content appendFormat:@"ignoreSpaceChanged=%s\n", ignoreSpaceChanged ? "true" : "false"];
-    [content appendFormat:@"altTaskSwitcher=%s\n", altTaskSwitcher ? "true" : "false"];
-
-    if (disableKey == (int)kCGEventFlagMaskControl) {
-        [content appendFormat:@"disableKey=control\n"];
-    } else if (disableKey == (int)kCGEventFlagMaskAlternate) {
-        [content appendFormat:@"disableKey=option\n"];
-    } else {
-        [content appendFormat:@"disableKey=disabled\n"];
-    }
-
-    NSString *ignoreAppsStr = [[PreferencesWindowController shared] ignoreAppsString];
-    if (ignoreAppsStr.length) {
-        [content appendFormat:@"ignoreApps=%@\n", ignoreAppsStr];
-    }
-    NSString *ignoreTitlesStr = [ignoreTitles componentsJoinedByString:@","];
-    if (ignoreTitlesStr.length) {
-        [content appendFormat:@"ignoreTitles=%@\n", ignoreTitlesStr];
-    }
-    if (mouseDelta > 0) { [content appendFormat:@"mouseDelta=%.1f\n", mouseDelta]; }
-    if (verbose) { [content appendFormat:@"verbose=true\n"]; }
-
-    [content writeToFile:configPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    [ConfigClass saveConfig];
 }
 
 @end // StatusBarController

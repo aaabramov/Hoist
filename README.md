@@ -69,7 +69,7 @@ a menu bar status icon for runtime configuration:
   - **Right-click** the menu bar icon to open a context menu where you can adjust delay, warp, scale, and other settings.
   - Select **Preferences...** from the context menu to open a window with sliders and text fields for fine-tuning all parameters.
 
-Changes made via the menu bar or preferences window are saved automatically to `~/.config/Hoist/config`.
+Changes made via the menu bar or preferences window are saved automatically to `~/.config/hoist/config.json`.
 
 **Command line usage:**
 
@@ -113,27 +113,29 @@ Changes made via the menu bar or preferences window are saved automatically to `
 
   - verbose: Set to true to make Hoist show a log of events when started in a terminal.
 
-Hoist can read these parameters from a configuration file. To make this happen, create a **~/.Hoist** file or a
-**~/.config/Hoist/config** file. The format is as follows:
+Hoist can read these parameters from a configuration file at **~/.config/hoist/config.json**:
 
-    #Hoist config file
-    pollMillis=50
-    delay=1
-    focusDelay=0
-    warpX=0.5
-    warpY=0.1
-    scale=2.5
-    scaleDuration=600
-    altTaskSwitcher=false
-    requireMouseStop=true
-    ignoreSpaceChanged=false
-    invertDisableKey=false
-    invertIgnoreApps=false
-    ignoreApps="IntelliJ IDEA,WebStorm"
-    ignoreTitles="\\s\\| Microsoft Teams,^window$,..."
-    stayFocusedBundleIds="com.apple.SecurityAgent,..."
-    disableKey="control"
-    mouseDelta=0.1
+```json
+{
+    "pollMillis": 50,
+    "delay": 1,
+    "focusDelay": 0,
+    "warpX": 0.5,
+    "warpY": 0.1,
+    "scale": 2.5,
+    "scaleDuration": 600,
+    "altTaskSwitcher": false,
+    "requireMouseStop": true,
+    "ignoreSpaceChanged": false,
+    "invertDisableKey": false,
+    "invertIgnoreApps": false,
+    "ignoreApps": ["IntelliJ IDEA", "WebStorm"],
+    "ignoreTitles": ["\\s\\| Microsoft Teams", "^window$"],
+    "stayFocusedBundleIds": ["com.apple.SecurityAgent"],
+    "disableKey": "control",
+    "mouseDelta": 0.1
+}
+```
 
 **Hoist.app usage:**
 
