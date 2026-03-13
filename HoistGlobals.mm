@@ -1,5 +1,5 @@
 /*
- * AutoRaise - Copyright (C) 2026 aaabramov
+ * Hoist - Copyright (C) 2026 aaabramov
  * Some pieces of the code are based on
  * sbmpost by sbmpost as part of https://github.com/sbmpost/AutoRaise
  * metamove by jmgao as part of XFree86
@@ -18,7 +18,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "AutoRaise.h"
+#include "Hoist.h"
 
 // ---- Global variables ----
 

@@ -1,5 +1,5 @@
 /*
- * AutoRaise - Copyright (C) 2026 aaabramov
+ * Hoist - Copyright (C) 2026 aaabramov
  * Some pieces of the code are based on
  * sbmpost by sbmpost as part of https://github.com/sbmpost/AutoRaise
  * metamove by jmgao as part of XFree86
@@ -26,14 +26,14 @@
 #include <ServiceManagement/ServiceManagement.h>
 #include <libproc.h>
 
-#define AUTORAISE_VERSION "5.6"
+#define HOIST_VERSION "5.6"
 #define STACK_THRESHOLD 20
 
 #ifdef EXPERIMENTAL_FOCUS_FIRST
 #if SKYLIGHT_AVAILABLE
 // Focus first is an experimental feature that can break easily across different OSX
 // versions. It relies on the private Skylight api. As such, there are absolutely no
-// guarantees that this feature will keep on working in future versions of AutoRaise.
+// guarantees that this feature will keep on working in future versions of Hoist.
 #define FOCUS_FIRST
 #else
 #pragma message "Skylight api is unavailable, Focus First is disabled"
@@ -418,7 +418,7 @@ AXUIElementRef get_raisable_window(AXUIElementRef _element, CGPoint point, int c
                                 frontmostApplication] processIdentifier];
                             if (application_pid != frontmost_pid) {
                                 // Focus and/or raising is the responsibility of XQuartz.
-                                // As such AutoRaise features (delay/warp) do not apply.
+                                // As such Hoist features (delay/warp) do not apply.
                                 activate(application_pid);
                             }
                         }
@@ -853,8 +853,8 @@ NSMutableDictionary *parameters = [[NSMutableDictionary alloc] init];
 
 - (void) readHiddenConfig {
     // search for dotfiles
-    NSString * hiddenConfigFilePath = [self getFilePath: @".AutoRaise"];
-    if (!hiddenConfigFilePath) { hiddenConfigFilePath = [self getFilePath: @".config/AutoRaise/config"]; }
+    NSString * hiddenConfigFilePath = [self getFilePath: @".Hoist"];
+    if (!hiddenConfigFilePath) { hiddenConfigFilePath = [self getFilePath: @".config/Hoist/config"]; }
 
     if (hiddenConfigFilePath) {
         NSLog(@"Reading config from: %@", hiddenConfigFilePath);
@@ -968,7 +968,7 @@ static StatusBarController *statusBarController = nil;
     _panel = [[NSPanel alloc] initWithContentRect:NSMakeRect(0, 0, 420, 500)
         styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable)
         backing:NSBackingStoreBuffered defer:YES];
-    _panel.title = @"AutoRaise Preferences";
+    _panel.title = @"Hoist Preferences";
     _panel.level = NSFloatingWindowLevel;
     _panel.hidesOnDeactivate = NO;
     [_panel center];
@@ -1230,7 +1230,7 @@ static StatusBarController *statusBarController = nil;
         _statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
         if (@available(macOS 11.0, *)) {
             _statusItem.button.image = [NSImage imageWithSystemSymbolName:@"cursorarrow.rays"
-                accessibilityDescription:@"AutoRaise"];
+                accessibilityDescription:@"Hoist"];
         } else {
             _statusItem.button.title = @"AR";
         }
@@ -1360,7 +1360,7 @@ static StatusBarController *statusBarController = nil;
 - (void) updateIconState {
     if (@available(macOS 11.0, *)) {
         NSImage *img = [NSImage imageWithSystemSymbolName:@"cursorarrow.rays"
-            accessibilityDescription:@"AutoRaise"];
+            accessibilityDescription:@"Hoist"];
         if (!delayCount) {
             NSImageSymbolConfiguration *config = [NSImageSymbolConfiguration
                 configurationWithPaletteColors:@[[NSColor tertiaryLabelColor]]];
@@ -1448,7 +1448,7 @@ static StatusBarController *statusBarController = nil;
 }
 
 - (void) saveConfig {
-    NSString *configDir = [NSString stringWithFormat:@"%@/.config/AutoRaise", NSHomeDirectory()];
+    NSString *configDir = [NSString stringWithFormat:@"%@/.config/Hoist", NSHomeDirectory()];
     NSString *configPath = [NSString stringWithFormat:@"%@/config", configDir];
 
     NSFileManager *fm = [NSFileManager defaultManager];
@@ -1457,7 +1457,7 @@ static StatusBarController *statusBarController = nil;
     }
 
     NSMutableString *content = [[NSMutableString alloc] init];
-    [content appendFormat:@"# AutoRaise configuration (saved by menu bar)\n"];
+    [content appendFormat:@"# Hoist configuration (saved by menu bar)\n"];
     [content appendFormat:@"delay=%d\n", menuDelayCount ? menuDelayCount : savedDelayCount];
 
     [content appendFormat:@"warpX=%.2f\n", warpX];
@@ -1941,7 +1941,7 @@ int main(int argc, const char * argv[]) {
         invertIgnoreApps   = [parameters[kInvertIgnoreApps] boolValue];
         invertDisableKey   = [parameters[kInvertDisableKey] boolValue];
 
-        printf("\nv%s by sbmpost(c) 2026, usage:\n\nAutoRaise\n", AUTORAISE_VERSION);
+        printf("\nv%s by sbmpost(c) 2026, usage:\n\nHoist\n", HOIST_VERSION);
         printf("  -pollMillis <20, 30, 40, 50, ...>\n");
         printf("  -delay <0=no-raise, 1=no-delay, 2=%dms, 3=%dms, ...>\n", pollMillis, pollMillis*2);
 #ifdef FOCUS_FIRST

@@ -1,5 +1,5 @@
 /*
- * AutoRaise - Copyright (C) 2026 aaabramov
+ * Hoist - Copyright (C) 2026 aaabramov
  * Some pieces of the code are based on
  * sbmpost by sbmpost as part of https://github.com/sbmpost/AutoRaise
  * metamove by jmgao as part of XFree86
@@ -18,8 +18,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef AUTORAISE_H
-#define AUTORAISE_H
+#ifndef HOIST_H
+#define HOIST_H
 
 #include <ApplicationServices/ApplicationServices.h>
 #include <CoreFoundation/CoreFoundation.h>
@@ -31,7 +31,7 @@
 
 // ---- Constants ----
 
-#define AUTORAISE_VERSION "5.6"
+#define HOIST_VERSION "5.6"
 #define STACK_THRESHOLD 20
 
 #ifdef EXPERIMENTAL_FOCUS_FIRST
@@ -252,4 +252,4 @@ void onTick();
 void AXCallback(AXObserverRef observer, AXUIElementRef _element, CFStringRef notification, void * destroyedMouseWindow_id);
 CGEventRef eventTapHandler(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *userInfo);
 
-#endif // AUTORAISE_H
+#endif // HOIST_H

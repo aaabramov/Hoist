@@ -1,5 +1,5 @@
 /*
- * AutoRaise - Copyright (C) 2026 aaabramov
+ * Hoist - Copyright (C) 2026 aaabramov
  * Some pieces of the code are based on
  * sbmpost by sbmpost as part of https://github.com/sbmpost/AutoRaise
  * metamove by jmgao as part of XFree86
@@ -18,7 +18,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "AutoRaise.h"
+#include "Hoist.h"
 
 @implementation ConfigClass
 - (NSString *) getFilePath:(NSString *) filename {
@@ -53,8 +53,8 @@
 
 - (void) readHiddenConfig {
     // search for dotfiles
-    NSString * hiddenConfigFilePath = [self getFilePath: @".AutoRaise"];
-    if (!hiddenConfigFilePath) { hiddenConfigFilePath = [self getFilePath: @".config/AutoRaise/config"]; }
+    NSString * hiddenConfigFilePath = [self getFilePath: @".Hoist"];
+    if (!hiddenConfigFilePath) { hiddenConfigFilePath = [self getFilePath: @".config/Hoist/config"]; }
 
     if (hiddenConfigFilePath) {
         NSLog(@"Reading config from: %@", hiddenConfigFilePath);

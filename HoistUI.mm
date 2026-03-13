@@ -1,5 +1,5 @@
 /*
- * AutoRaise - Copyright (C) 2026 aaabramov
+ * Hoist - Copyright (C) 2026 aaabramov
  * Some pieces of the code are based on
  * sbmpost by sbmpost as part of https://github.com/sbmpost/AutoRaise
  * metamove by jmgao as part of XFree86
@@ -18,7 +18,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "AutoRaise.h"
+#include "Hoist.h"
 
 //------------------------------------------status bar controller--------------------------------------------
 
@@ -51,7 +51,7 @@ StatusBarController *statusBarController = nil;
     _panel = [[NSPanel alloc] initWithContentRect:NSMakeRect(0, 0, 420, 500)
         styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable)
         backing:NSBackingStoreBuffered defer:YES];
-    _panel.title = @"AutoRaise Preferences";
+    _panel.title = @"Hoist Preferences";
     _panel.level = NSFloatingWindowLevel;
     _panel.hidesOnDeactivate = NO;
     [_panel center];
@@ -313,7 +313,7 @@ StatusBarController *statusBarController = nil;
         _statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
         if (@available(macOS 11.0, *)) {
             _statusItem.button.image = [NSImage imageWithSystemSymbolName:@"cursorarrow.rays"
-                accessibilityDescription:@"AutoRaise"];
+                accessibilityDescription:@"Hoist"];
         } else {
             _statusItem.button.title = @"AR";
         }
@@ -443,7 +443,7 @@ StatusBarController *statusBarController = nil;
 - (void) updateIconState {
     if (@available(macOS 11.0, *)) {
         NSImage *img = [NSImage imageWithSystemSymbolName:@"cursorarrow.rays"
-            accessibilityDescription:@"AutoRaise"];
+            accessibilityDescription:@"Hoist"];
         if (!delayCount) {
             NSImageSymbolConfiguration *config = [NSImageSymbolConfiguration
                 configurationWithPaletteColors:@[[NSColor tertiaryLabelColor]]];
@@ -531,7 +531,7 @@ StatusBarController *statusBarController = nil;
 }
 
 - (void) saveConfig {
-    NSString *configDir = [NSString stringWithFormat:@"%@/.config/AutoRaise", NSHomeDirectory()];
+    NSString *configDir = [NSString stringWithFormat:@"%@/.config/Hoist", NSHomeDirectory()];
     NSString *configPath = [NSString stringWithFormat:@"%@/config", configDir];
 
     NSFileManager *fm = [NSFileManager defaultManager];
@@ -540,7 +540,7 @@ StatusBarController *statusBarController = nil;
     }
 
     NSMutableString *content = [[NSMutableString alloc] init];
-    [content appendFormat:@"# AutoRaise configuration (saved by menu bar)\n"];
+    [content appendFormat:@"# Hoist configuration (saved by menu bar)\n"];
     [content appendFormat:@"delay=%d\n", menuDelayCount ? menuDelayCount : savedDelayCount];
 
     [content appendFormat:@"warpX=%.2f\n", warpX];
