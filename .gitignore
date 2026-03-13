@@ -1,8 +1,9 @@
-AutoRaise
-AutoRaise.out
-AutoRaise.app
-AutoRaiseDev
-AutoRaiseDev.app
+Hoist
+Hoist.out
+Hoist.app
+HoistDev
+HoistDev.app
 *~
 .DS_Store
-AutoRaise.dmg
+Hoist.dmg
+*.o

@@ -1,42 +1,50 @@
 SKYLIGHT_AVAILABLE := $(shell test -d /System/Library/PrivateFrameworks/SkyLight.framework && echo 1 || echo 0)
 override CXXFLAGS += -O2 -Wall -fobjc-arc -D"NS_FORMAT_ARGUMENT(A)=" -D"SKYLIGHT_AVAILABLE=$(SKYLIGHT_AVAILABLE)"
 
-APP_NAME ?= AutoRaise
-BUNDLE_ID ?= com.iamandrii.autoraise
+APP_NAME ?= Hoist
+BUNDLE_ID ?= com.iamandrii.hoist
+VERSION ?= $(or $(GITHUB_REF_NAME),$(shell git describe --tags --abbrev=0 2>/dev/null),0.0)
+
+SRCS = HoistGlobals.mm HoistHelpers.mm HoistConfig.mm HoistUI.mm HoistWatcher.mm HoistMain.mm
+OBJS = $(SRCS:.mm=.o)
+
+FRAMEWORKS = -framework AppKit -framework ServiceManagement
+ifeq ($(SKYLIGHT_AVAILABLE), 1)
+    FRAMEWORKS += -F /System/Library/PrivateFrameworks -framework SkyLight
+endif
 
 .PHONY: all clean install build dev run debug update
 
-all: AutoRaise AutoRaise.app
+all: Hoist Hoist.app
 
 clean:
-	rm -f AutoRaise AutoRaiseDev
-	rm -rf AutoRaise.app AutoRaiseDev.app
+	rm -f Hoist HoistDev *.o
+	rm -rf Hoist.app HoistDev.app
 
-install: AutoRaise.app
-	rm -rf /Applications/AutoRaise.app
-	cp -r AutoRaise.app /Applications/
+install: Hoist.app
+	rm -rf /Applications/Hoist.app
+	cp -r Hoist.app /Applications/
 
-AutoRaise: AutoRaise.mm
-        ifeq ($(SKYLIGHT_AVAILABLE), 1)
-	    g++ $(CXXFLAGS) -o $@ $^ -framework AppKit -framework ServiceManagement -F /System/Library/PrivateFrameworks -framework SkyLight
-        else
-	    g++ $(CXXFLAGS) -o $@ $^ -framework AppKit -framework ServiceManagement
-        endif
+%.o: %.mm Hoist.h
+	g++ $(CXXFLAGS) -c -o $@ $<
 
-AutoRaise.app: AutoRaise Info.plist AutoRaise.icns
-	./create-app-bundle.sh $(APP_NAME) $(BUNDLE_ID)
+Hoist: $(OBJS)
+	g++ $(CXXFLAGS) -o $@ $^ $(FRAMEWORKS)
+
+Hoist.app: Hoist Info.plist Hoist.icns
+	./create-app-bundle.sh $(APP_NAME) $(BUNDLE_ID) $(VERSION)
 
 build: clean
 	make CXXFLAGS="-DOLD_ACTIVATION_METHOD -DEXPERIMENTAL_FOCUS_FIRST"
 
 dev: clean
-	make APP_NAME=AutoRaiseDev BUNDLE_ID=com.iamandrii.autoraise.dev CXXFLAGS="-DOLD_ACTIVATION_METHOD -DEXPERIMENTAL_FOCUS_FIRST"
-	cp AutoRaise AutoRaiseDev
+	make APP_NAME=HoistDev BUNDLE_ID=com.iamandrii.hoist.dev CXXFLAGS="-DOLD_ACTIVATION_METHOD -DEXPERIMENTAL_FOCUS_FIRST"
+	cp Hoist HoistDev
 
 run: dev
-	./AutoRaiseDev
+	./HoistDev
 
 debug: dev
-	./AutoRaiseDev -verbose 1
+	./HoistDev -verbose 1
 
 update: build install

@@ -11,14 +11,15 @@ permissions:
 jobs:
   release:
     runs-on: macos-latest
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Build
         run: make build
 
       - name: Ad-hoc sign app
-        run: codesign --force --deep --sign - AutoRaise.app
+        run: codesign --force --deep --sign - Hoist.app
 
       - name: Install create-dmg
         run: brew install create-dmg
@@ -26,26 +27,80 @@ jobs:
       - name: Create DMG
         run: |
           create-dmg \
-            --volname "AutoRaise" \
+            --volname "Hoist" \
             --window-pos 200 120 \
             --window-size 600 400 \
             --icon-size 100 \
-            --icon "AutoRaise.app" 150 190 \
+            --icon "Hoist.app" 150 190 \
             --app-drop-link 450 190 \
-            AutoRaise.dmg \
-            AutoRaise.app
+            Hoist.dmg \
+            Hoist.app
+
+      - name: Compute SHA256
+        id: sha256
+        run: |
+          SHA=$(shasum -a 256 Hoist.dmg | awk '{print $1}')
+          echo "sha256=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Update Homebrew tap
+        if: ${{ secrets.TAP_GITHUB_TOKEN != '' }}
+        env:
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          SHA256: ${{ steps.sha256.outputs.sha256 }}
+        run: |
+          git clone https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/aaabramov/homebrew-hoist.git tap
+          cd tap
+          cat > Casks/hoist.rb << EOF
+          cask "hoist" do
+            version "${TAG#v}"
+            sha256 "${SHA256}"
+
+            url "https://github.com/aaabramov/Hoist/releases/download/${TAG}/Hoist.dmg"
+            name "Hoist"
+            desc "Automatically raises and focuses windows on mouse hover"
+            homepage "https://github.com/aaabramov/Hoist"
+
+            app "Hoist.app"
+
+            postflight do
+              system_command "/usr/bin/xattr",
+                             args: ["-cr", "#{appdir}/Hoist.app"]
+            end
+
+            uninstall quit: "com.iamandrii.hoist"
+
+            zap trash: "~/.config/Hoist"
+          end
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/hoist.rb
+          git commit -m "Update Hoist to ${TAG}"
+          git push
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: AutoRaise.dmg
+          files: Hoist.dmg
           generate_release_notes: true
           body: |
             ## Installation
 
-            1. Download `AutoRaise.dmg`, open it, and drag `AutoRaise.app` to Applications
+            ### Option 1: Homebrew (recommended)
+            ```
+            brew install aaabramov/hoist/hoist
+            ```
+
+            ### Option 2: Install script
+            ```
+            curl -fsSL https://raw.githubusercontent.com/aaabramov/Hoist/master/install.sh | bash
+            ```
+
+            ### Option 3: Manual
+            1. Download `Hoist.dmg`, open it, and drag `Hoist.app` to Applications
             2. Remove the quarantine attribute (required for accessibility permissions):
                ```
-               xattr -cr /Applications/AutoRaise.app
+               xattr -cr /Applications/Hoist.app
                ```
-            3. Launch AutoRaise and grant Accessibility permission when prompted
+            3. Launch Hoist and grant Accessibility permission when prompted
