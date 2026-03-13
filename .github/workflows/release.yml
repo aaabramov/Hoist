@@ -40,3 +40,12 @@ jobs:
         with:
           files: AutoRaise.dmg
           generate_release_notes: true
+          body: |
+            ## Installation
+
+            1. Download `AutoRaise.dmg`, open it, and drag `AutoRaise.app` to Applications
+            2. Remove the quarantine attribute (required for accessibility permissions):
+               ```
+               xattr -cr /Applications/AutoRaise.app
+               ```
+            3. Launch AutoRaise and grant Accessibility permission when prompted
