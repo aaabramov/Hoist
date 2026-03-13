@@ -36,49 +36,6 @@ jobs:
             Hoist.dmg \
             Hoist.app
 
-      - name: Compute SHA256
-        id: sha256
-        run: |
-          SHA=$(shasum -a 256 Hoist.dmg | awk '{print $1}')
-          echo "sha256=$SHA" >> "$GITHUB_OUTPUT"
-
-      - name: Update Homebrew tap
-        if: ${{ secrets.TAP_GITHUB_TOKEN != '' }}
-        env:
-          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
-          TAG: ${{ github.ref_name }}
-          SHA256: ${{ steps.sha256.outputs.sha256 }}
-        run: |
-          git clone https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/aaabramov/homebrew-hoist.git tap
-          cd tap
-          cat > Casks/hoist.rb << EOF
-          cask "hoist" do
-            version "${TAG#v}"
-            sha256 "${SHA256}"
-
-            url "https://github.com/aaabramov/Hoist/releases/download/${TAG}/Hoist.dmg"
-            name "Hoist"
-            desc "Automatically raises and focuses windows on mouse hover"
-            homepage "https://github.com/aaabramov/Hoist"
-
-            app "Hoist.app"
-
-            postflight do
-              system_command "/usr/bin/xattr",
-                             args: ["-cr", "#{appdir}/Hoist.app"]
-            end
-
-            uninstall quit: "com.iamandrii.hoist"
-
-            zap trash: "~/.config/Hoist"
-          end
-          EOF
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Casks/hoist.rb
-          git commit -m "Update Hoist to ${TAG}"
-          git push
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
