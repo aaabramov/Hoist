@@ -6,3 +6,4 @@ AutoRaiseDev.app
 *~
 .DS_Store
 AutoRaise.dmg
+*.o

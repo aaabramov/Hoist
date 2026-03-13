@@ -1,0 +1,100 @@
+#include "AutoRaise.h"
+
+//-----------------------------------------------notifications----------------------------------------------
+
+MDWorkspaceWatcher * workspaceWatcher = NULL;
+
+@implementation MDWorkspaceWatcher
+- (id)init {
+    if ((self = [super init])) {
+        NSNotificationCenter * center =
+            [[NSWorkspace sharedWorkspace] notificationCenter];
+        [center
+            addObserver: self
+            selector: @selector(spaceChanged:)
+            name: NSWorkspaceActiveSpaceDidChangeNotification
+            object: nil];
+        if (warpMouse) {
+            [center
+                addObserver: self
+                selector: @selector(appActivated:)
+                name: NSWorkspaceDidActivateApplicationNotification
+                object: nil];
+            if (verbose) { NSLog(@"Registered app activated selector"); }
+        }
+    }
+    return self;
+}
+
+- (void)updateWarpObserver {
+    NSNotificationCenter * center = [[NSWorkspace sharedWorkspace] notificationCenter];
+    [center removeObserver:self name:NSWorkspaceDidActivateApplicationNotification object:nil];
+    if (warpMouse) {
+        [center addObserver:self selector:@selector(appActivated:)
+            name:NSWorkspaceDidActivateApplicationNotification object:nil];
+        if (verbose) { NSLog(@"Registered app activated selector"); }
+    } else {
+        if (verbose) { NSLog(@"Unregistered app activated selector"); }
+    }
+}
+
+- (void)dealloc {
+    [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver: self];
+}
+
+- (void)spaceChanged:(NSNotification *)notification {
+    if (verbose) { NSLog(@"Space changed"); }
+    spaceChanged();
+}
+
+- (void)appActivated:(NSNotification *)notification {
+    if (verbose) { NSLog(@"App activated, waiting %0.3fs", ACTIVATE_DELAY_MS/1000.0); }
+    [self performSelector: @selector(onAppActivated) withObject: nil afterDelay: ACTIVATE_DELAY_MS/1000.0];
+}
+
+- (void)onAppActivated {
+    if (appActivated() && cursorScale != oldScale) {
+        [NSObject cancelPreviousPerformRequestsWithTarget: self selector: @selector(onScaleCursorUp) object: nil];
+        [NSObject cancelPreviousPerformRequestsWithTarget: self selector: @selector(onScaleCursorDown) object: nil];
+        if (verbose) { NSLog(@"Set cursor scale after %0.3fs", SCALE_DELAY_MS/1000.0); }
+        [self performSelector: @selector(onScaleCursorUp)
+            withObject: nil
+            afterDelay: SCALE_DELAY_MS/1000.0];
+        [self performSelector: @selector(onScaleCursorDown)
+            withObject: nil
+            afterDelay: (SCALE_DELAY_MS + scaleDurationMs)/1000.0];
+    }
+}
+
+- (void)onScaleCursorUp {
+    if (verbose) { NSLog(@"Set cursor scale: %.0f (up)", cursorScale); }
+    CGSSetCursorScale(CGSMainConnectionID(), cursorScale);
+}
+
+- (void)onScaleCursorDown {
+    if (verbose) { NSLog(@"Set cursor scale: %.0f (down)", oldScale); }
+    CGSSetCursorScale(CGSMainConnectionID(), oldScale);
+}
+
+- (void)onTick:(NSNumber *)timerInterval {
+    [self performSelector: @selector(onTick:)
+        withObject: timerInterval
+        afterDelay: timerInterval.floatValue];
+    onTick();
+}
+
+#ifdef FOCUS_FIRST
+- (void)windowFocused:(AXUIElementRef)_window {
+    if (verbose) { NSLog(@"Window focused, waiting %0.3fs", raiseDelayCount*pollMillis/1000.0); }
+    [self performSelector: @selector(onWindowFocused:)
+        withObject: [NSNumber numberWithUnsignedLong: (uint64_t) _window]
+        afterDelay: raiseDelayCount*pollMillis/1000.0];
+}
+
+- (void)onWindowFocused:(NSNumber *)_window {
+    if (_window.unsignedLongValue == (uint64_t) _lastFocusedWindow) {
+        raiseAndActivate(_lastFocusedWindow, lastFocusedWindow_pid);
+    } else if (verbose) { NSLog(@"Ignoring window focused event"); }
+}
+#endif
+@end // MDWorkspaceWatcher

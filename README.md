@@ -6,6 +6,16 @@ See also [on stackoverflow](https://stackoverflow.com/questions/98310/focus-foll
 
 **Quick start**
 
+Install via Homebrew (recommended):
+
+    brew install aaabramov/autoraise/autoraise
+
+Or use the install script:
+
+    curl -fsSL https://raw.githubusercontent.com/aaabramov/AutoRaise/master/install.sh | bash
+
+Or install manually:
+
 1. Download `AutoRaise.dmg` from the [latest release](https://github.com/aaabramov/AutoRaise/releases/latest)
 2. Open the DMG and drag AutoRaise.app into the Applications folder.
 3. Remove the quarantine attribute (required for accessibility permissions):
@@ -220,10 +230,6 @@ The output should look something like this:
     2026-02-01 14:25:56.287 AutoRaise[44780:1615626] Desktop origin (-1920.000000, -360.000000)
     ...
     ...
-
-*Note*: Dimentium created a homebrew formula for this tool which can be found here:
-
-https://github.com/Dimentium/homebrew-autoraise
 
 **Credits**
 

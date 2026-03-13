@@ -35,6 +35,49 @@ jobs:
             AutoRaise.dmg \
             AutoRaise.app
 
+      - name: Compute SHA256
+        id: sha256
+        run: |
+          SHA=$(shasum -a 256 AutoRaise.dmg | awk '{print $1}')
+          echo "sha256=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Update Homebrew tap
+        if: ${{ secrets.TAP_GITHUB_TOKEN != '' }}
+        env:
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          SHA256: ${{ steps.sha256.outputs.sha256 }}
+        run: |
+          git clone https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/aaabramov/homebrew-autoraise.git tap
+          cd tap
+          cat > Casks/autoraise.rb << EOF
+          cask "autoraise" do
+            version "${TAG#v}"
+            sha256 "${SHA256}"
+
+            url "https://github.com/aaabramov/AutoRaise/releases/download/${TAG}/AutoRaise.dmg"
+            name "AutoRaise"
+            desc "Automatically raises and focuses windows on mouse hover"
+            homepage "https://github.com/aaabramov/AutoRaise"
+
+            app "AutoRaise.app"
+
+            postflight do
+              system_command "/usr/bin/xattr",
+                             args: ["-cr", "#{appdir}/AutoRaise.app"]
+            end
+
+            uninstall quit: "com.iamandrii.autoraise"
+
+            zap trash: "~/.config/AutoRaise"
+          end
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/autoraise.rb
+          git commit -m "Update AutoRaise to ${TAG}"
+          git push
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -43,6 +86,17 @@ jobs:
           body: |
             ## Installation
 
+            ### Option 1: Homebrew (recommended)
+            ```
+            brew install aaabramov/autoraise/autoraise
+            ```
+
+            ### Option 2: Install script
+            ```
+            curl -fsSL https://raw.githubusercontent.com/aaabramov/AutoRaise/master/install.sh | bash
+            ```
+
+            ### Option 3: Manual
             1. Download `AutoRaise.dmg`, open it, and drag `AutoRaise.app` to Applications
             2. Remove the quarantine attribute (required for accessibility permissions):
                ```

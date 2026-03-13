@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AutoRaise is a macOS utility that automatically raises and focuses windows on mouse hover. It's a single-file Objective-C++ project (`AutoRaise.mm`, ~2050 lines) with a Makefile build system. The .app bundle includes a menu bar status icon for runtime configuration and a preferences window.
+AutoRaise is a macOS utility that automatically raises and focuses windows on mouse hover. It's an Objective-C++ project split across multiple files with a Makefile build system. The .app bundle includes a menu bar status icon for runtime configuration and a preferences window.
 
 ## Build Commands
 
@@ -22,17 +22,15 @@ Compiler: `g++` with `-fobjc-arc -O2`. Requires Xcode Command Line Tools.
 
 ## Architecture
 
-The entire application lives in `AutoRaise.mm` — a monolithic Objective-C++ file organized into these sections:
+The codebase is split into these files, all sharing `AutoRaise.h`:
 
-1. **Configuration & Constants** (~lines 1-167) — Global vars, feature flags, hard-coded app lists for special handling
-2. **Private API Declarations** (~lines 66-87) — SkyLight/CGS private APIs for focus-first and cursor scaling
-3. **Core Helper Functions** (~lines 224-607) — Window detection (`get_mousewindow`, `get_raisable_window`, `topwindow`, `fallback`), activation (`activate`, `raiseAndActivate`), mouse warping (`get_mousepoint`), environment checks (`dock_active`, `mc_active`, `findScreen`)
-4. **Workspace Watcher** (`MDWorkspaceWatcher`, ~lines 683-775) — NSObject that handles space changes, app activation, cursor scaling (with separate up/down methods), and drives the main polling timer
-5. **Configuration Class** (`ConfigClass`, ~lines 800-914) — Parses CLI args and config files (`~/.AutoRaise` or `~/.config/AutoRaise/config`). Config file is always loaded first; CLI args override.
-6. **Preferences Window** (`PreferencesWindowController`, ~lines 920-1095) — NSPanel with sliders for delay, scale duration, warp X/Y; popup for disable key; text fields for ignore apps/titles. Changes are applied live and saved to config.
-7. **Status Bar Controller** (`StatusBarController`, ~lines 1100-1450) — Menu bar icon (`cursorarrow.rays` SF Symbol). Left-click toggles enable/disable; right-click opens context menu with delay submenu, warp toggle, scale submenu, boolean toggles, preferences, and quit. Persists settings to `~/.config/AutoRaise/config`.
-8. **Event Handling & Main Loop** (~lines 1455-1840) — `onTick()` polling loop (mouse tracking, raise/focus logic), `eventTapHandler()` for global keyboard events (cmd-tab detection, disable key)
-9. **Main Entry Point** (~lines 1877-2048) — Config loading, accessibility permission check, event tap setup, status bar initialization, NSRunLoop
+- **`AutoRaise.h`** — Shared header: includes, constants, `extern` globals, `@interface` blocks, function prototypes
+- **`AutoRaiseGlobals.mm`** — Global variable definitions, config key constants, `parametersDictionary`/`parameters`
+- **`AutoRaiseHelpers.mm`** — Window detection (`get_mousewindow`, `get_raisable_window`, `topwindow`, `fallback`), activation (`activate`, `raiseAndActivate`), mouse warping (`get_mousepoint`), environment checks (`dock_active`, `mc_active`, `findScreen`), yabai focus methods
+- **`AutoRaiseWatcher.mm`** — `MDWorkspaceWatcher`: space changes, app activation, cursor scaling, polling timer
+- **`AutoRaiseConfig.mm`** — `ConfigClass`: CLI args and config file parsing (`~/.AutoRaise` or `~/.config/AutoRaise/config`)
+- **`AutoRaiseUI.mm`** — `PreferencesWindowController` + `StatusBarController`: menu bar icon, context menu, preferences panel, live config persistence
+- **`AutoRaiseMain.mm`** — `spaceChanged()`, `appActivated()`, `onTick()` polling loop, `eventTapHandler()`, `main()`
 
 ## Key Compilation Flags
 
